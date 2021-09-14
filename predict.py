@@ -1,11 +1,13 @@
 import streamlit as st
 import pandas as pd
+import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn import metrics
 import base64
 import os
 from app_functions import *
+from streamlit_echarts import st_echarts
 
 st.sidebar.subheader('Stock Dataset')
 status, df = file_upload('Please upload a stock price dataset')
@@ -15,9 +17,34 @@ st.title('Stock Price Prediction')
 if not status:
     st.write('Please use the sidebar to update your data !')
 
+
+
 if status:
     st.subheader('Preview of the dataset')
     df = extract_features_from_date(df)
+    # fig = plt.figure()
+    # ax = fig.add_subplot(1,1,1)
+    # ax.scatter(
+    #     df.index,
+    #     df["Close"],
+    # )
+
+    # ax.set_xlabel("Date")
+    # ax.set_ylabel("Close Price history")
+    # st.pyplot(fig, clear_figure=None)
+    st.line_chart(df["Close"],use_container_width=True)
+    option = {
+        "xAxis": {
+            "type": "category",
+            "data": df.index.astype(str).values.tolist(),
+        },
+        "yAxis": {"type": "value"},
+        "series": [{"data": df["Close"].astype(str).values.tolist(), "type": "scatter"}],
+        "lineStyle": [{ "color": '#5470C6', "width": '4', "type": 'dashed'}]
+        }
+    st_echarts(
+        options=option, height="400px",
+    )
 
 if status == True:
     col_names = list(df)

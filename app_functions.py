@@ -22,4 +22,7 @@ def file_upload(name):
 
 def extract_features_from_date(df):
     st.write(df.head())
+    df["Date"]=pd.to_datetime(df.Date,format="%Y-%m-%d")
+    df.index=df['Date']
+    df = df.sort_index()
     return df
