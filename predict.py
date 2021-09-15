@@ -22,29 +22,22 @@ if not status:
 if status:
     st.subheader('Preview of the dataset')
     df = extract_features_from_date(df)
-    # fig = plt.figure()
-    # ax = fig.add_subplot(1,1,1)
-    # ax.scatter(
-    #     df.index,
-    #     df["Close"],
+    st.write(df.head())
+    feature_cols = st.multiselect('Please select columns to plot',list(df),key='plot_col')
+    if feature_cols:
+        st.line_chart(df[feature_cols],use_container_width=True)
+    # option = {
+    #     "xAxis": {
+    #         "type": "category",
+    #         "data": df.index.astype(str).values.tolist(),
+    #     },
+    #     "yAxis": {"type": "value"},
+    #     "series": [{"data": df["Close"].astype(str).values.tolist(), "type": "scatter"}],
+    #     "lineStyle": [{ "color": '#5470C6', "width": '4', "type": 'dashed'}]
+    #     }
+    # st_echarts(
+    #     options=option, height="400px",
     # )
-
-    # ax.set_xlabel("Date")
-    # ax.set_ylabel("Close Price history")
-    # st.pyplot(fig, clear_figure=None)
-    st.line_chart(df["Close"],use_container_width=True)
-    option = {
-        "xAxis": {
-            "type": "category",
-            "data": df.index.astype(str).values.tolist(),
-        },
-        "yAxis": {"type": "value"},
-        "series": [{"data": df["Close"].astype(str).values.tolist(), "type": "scatter"}],
-        "lineStyle": [{ "color": '#5470C6', "width": '4', "type": 'dashed'}]
-        }
-    st_echarts(
-        options=option, height="400px",
-    )
 
 if status == True:
     col_names = list(df)

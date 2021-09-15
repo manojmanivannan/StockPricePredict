@@ -21,8 +21,9 @@ def file_upload(name):
         return content, None
 
 def extract_features_from_date(df):
-    st.write(df.head())
+    
     df["Date"]=pd.to_datetime(df.Date,format="%Y-%m-%d")
     df.index=df['Date']
+    df.drop('Date',axis=1,inplace=True)
     df = df.sort_index()
     return df
