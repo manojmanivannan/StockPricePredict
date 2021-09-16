@@ -5,3 +5,4 @@ matplotlib==3.4.3
 keras==2.6.0
 streamlit==0.88.0
 scikit_learn==0.24.2
+tensorflow==2.6.0
