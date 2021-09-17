@@ -180,6 +180,6 @@ if status == True:
     st.line_chart(result_df)
     with st.expander('View result dataset'):
         st.write(result_df)
-    st.download_button('Download result', result_df.to_csv(), file_name='prediction_result.csv')
+    st.download_button('Download result', result_df.to_csv(), file_name=f'{file_name}_prediction_results.csv')
 
 
