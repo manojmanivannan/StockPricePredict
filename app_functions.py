@@ -13,17 +13,17 @@ def file_upload(name):
         try:
             uploaded_df = pd.read_csv(uploaded_file)
             content = True
-            return content, uploaded_df
+            return content, uploaded_df, uploaded_file.name.split('.')[0]
         except:
             try:
                 uploaded_df = pd.read_excel(uploaded_file)
                 content = True
-                return content, uploaded_df
+                return content, uploaded_df, uploaded_file.name.split('.')[0]
             except:
                 st.error('Please ensure file is .csv or .xlsx format and/or reupload file')
                 return content, None
     else:
-        return content, None
+        return content, None, None
 
 def extract_features_from_date(df):
     
