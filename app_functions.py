@@ -22,7 +22,7 @@ def file_upload(name):
                 return content, uploaded_df, uploaded_file.name.split('.')[0]
             except:
                 st.error('Please ensure file is .csv or .xlsx format and/or reupload file')
-                return content, None
+                return content, None, None
     else:
         return content, None, None
 
