@@ -1,4 +1,5 @@
 from os import pread
+from altair.vegalite.v4.schema.core import Value
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -13,25 +14,40 @@ def file_upload(name):
         try:
             uploaded_df = pd.read_csv(uploaded_file)
             content = True
-            return content, uploaded_df
+            return content, uploaded_df, uploaded_file.name.split('.')[0]
         except:
             try:
                 uploaded_df = pd.read_excel(uploaded_file)
                 content = True
-                return content, uploaded_df
+                return content, uploaded_df, uploaded_file.name.split('.')[0]
             except:
                 st.error('Please ensure file is .csv or .xlsx format and/or reupload file')
                 return content, None
     else:
-        return content, None
+        return content, None, None
 
 def extract_features_from_date(df):
+    format_col1, format_col2 = st.columns(2)
+    with format_col1: date_format = st.selectbox('Date format', ['YYYYMMDD','MMDDYYYY'], index=0)
+    with format_col2: separator = st.radio("Date separator", ('/', '-'))
+
+
+    if date_format == 'MMDDYYYY':
+        d_format = "%m#%d#%Y".replace('#',separator)
+    if date_format == 'YYYYMMDD':
+        d_format = "%Y#%m#%d".replace('#',separator)
     
-    df["Date"]=pd.to_datetime(df.Date,format="%Y-%m-%d")
-    df.index=df['Date']
-    # df.drop('Date',axis=1,inplace=True)
-    df = df.sort_index(axis=0)
-    return df
+    try:
+        df["Date"]=pd.to_datetime(df.Date,format=d_format)
+        df.index=df['Date']
+        # df.drop('Date',axis=1,inplace=True)
+        df = df.sort_index(axis=0)
+        return df
+    except Exception as e:
+        st.write(f'{e}')
+        st.stop()
+
+
 
 def create_dataset(dataset, look_back=1):
     '''

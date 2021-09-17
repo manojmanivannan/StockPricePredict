@@ -15,10 +15,11 @@ from app_functions import *
 from streamlit_echarts import st_echarts
 
 st.sidebar.subheader('Stock Dataset')
-status, df = file_upload('Please upload a stock price dataset')
+status, df, file_name = file_upload('Please upload a stock price dataset')
 
 st.title('Stock Price Prediction')
-st.subheader('A simple stock Prediction App')
+st.subheader('Using Keras Long-Short Term Memory (LSTM) Neural Network')
+st.text("")
 
 if not status:
     st.write('Please use the sidebar to update your data !')
@@ -59,17 +60,27 @@ if status == True:
 
     st.title('Training')
     st.subheader('Parameters')
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4 = st.columns(4)
 
     with col1:
-        label_col = st.selectbox('Please select column to predict',col_names)
+        label_col = st.selectbox('Column to predict',col_names)
     with col2:
-        test_size_ratio = st.number_input('Please enter test size',0.01,0.99,0.25,0.05)
+        test_size_ratio = st.number_input('Test size',0.01,0.99,0.25,0.05)
     with col3:
-        period = int(st.number_input('Please enter lookback Period',1,10,4,1))
-    l_col1, l_col2 = st.columns(2)
+        period = int(st.number_input('Lookback Period',1,10,4,1))
+    with col4:
+        no_layers = int(st.number_input('# of layers',2,10,2,1))
+
+
+    l_col1, l_col2, *l_colx = st.columns(no_layers)
+
     with l_col1: layer_1 = st.slider('Layer 1 Nodes', min_value=1, max_value=100, value=50, step=1)
     with l_col2: layer_2 = st.slider('Layer 2 Nodes', min_value=1, max_value=100, value=50, step=1)
+    if no_layers>2:
+        i=2
+        for each in l_colx:
+            with each: globals()['layer_'+str(i+1)] = st.slider(f'Layer {i+1} Nodes', min_value=1, max_value=100, value=50, step=1)
+            i+=1
 
     with st.expander('Advanced Parameters'):
         col4_1, col4_2 = st.columns(2)
@@ -88,11 +99,12 @@ if status == True:
         st.stop()
     
     data=df.sort_index(ascending=True,axis=0)
-
+    data[label_col] = data[label_col].replace({'\$': '', ',': '','€':''}, regex=True).astype(float)
     predict_df=data[[label_col]]
 
     dataset = predict_df.values
     dataset = dataset.astype('float32')
+
 
     # normalize the dataset
     scaler = MinMaxScaler(feature_range=(0, 1))
@@ -114,24 +126,38 @@ if status == True:
 
     lstm_model=Sequential()
     lstm_model.add(LSTM(units=layer_1,return_sequences=True,input_shape=(1, period)))
-    lstm_model.add(LSTM(units=layer_2))
+    if no_layers == 2:
+        lstm_model.add(LSTM(units=layer_2))
+    else:
+        lstm_model.add(LSTM(units=layer_2,return_sequences = True))
+    if no_layers>2:
+        i=2
+        for each in l_colx:
+            if i>=len(l_colx):
+                lstm_model.add(LSTM(units=globals()['layer_'+str(i+1)]))
+            else:
+                lstm_model.add(LSTM(units=globals()['layer_'+str(i+1)],return_sequences = True))
+            i+=1
     lstm_model.add(Dense(1))
     lstm_model.compile(loss=loss, optimizer=optimizer)
-    lstm_model.fit(trainX, trainY, epochs=epochs, batch_size=batchsize, verbose=2)
+    with st.spinner('Training Model..'):
+        lstm_model.fit(trainX, trainY, epochs=epochs, batch_size=batchsize, verbose=2)
 
-    # make predictions
-    trainPredict = lstm_model.predict(trainX)
-    testPredict = lstm_model.predict(testX)
-    # invert predictions
-    trainPredict = scaler.inverse_transform(trainPredict)
-    trainY = scaler.inverse_transform([trainY])
-    testPredict = scaler.inverse_transform(testPredict)
-    testY = scaler.inverse_transform([testY])
+        # make predictions
+        trainPredict = lstm_model.predict(trainX)
+        testPredict = lstm_model.predict(testX)
+        # invert predictions
+        trainPredict = scaler.inverse_transform(trainPredict)
+        trainY = scaler.inverse_transform([trainY])
+        testPredict = scaler.inverse_transform(testPredict)
+        testY = scaler.inverse_transform([testY])
     # calculate root mean squared error
     trainScore = math.sqrt(mean_squared_error(trainY[0], trainPredict[:,0]))
-    print('Train Score: %.2f RMSE' % (trainScore))
     testScore = math.sqrt(mean_squared_error(testY[0], testPredict[:,0]))
-    print('Test Score: %.2f RMSE' % (testScore))
+
+    result1, result2 = st.columns(2)
+    with result1: st.write('Train Score: %.2f RMSE' % (trainScore))
+    with result2: st.write('Test Score: %.2f RMSE' % (testScore))
     # shift train predictions for plotting
     trainPredictPlot = np.empty_like(dataset)
     trainPredictPlot[:, :] = np.nan
@@ -140,12 +166,20 @@ if status == True:
     testPredictPlot = np.empty_like(dataset)
     testPredictPlot[:, :] = np.nan
     testPredictPlot[len(trainPredict)+(period*2)+1:len(dataset)-1, :] = testPredict
-    # plot baseline and predictions
-    fig = plt.figure()
-    # plt.plot(scaler.inverse_transform(dataset))
-    main_df = pd.DataFrame(scaler.inverse_transform(dataset),columns=[label_col])
-    main_df['train']=trainPredictPlot
-    main_df['test'] = testPredictPlot
-    st.line_chart(main_df)
+
+    result_df = pd.DataFrame(scaler.inverse_transform(dataset),columns=[label_col])
+    result_df['Prediction on training set']=trainPredictPlot
+    result_df['Prediction on training set'] = result_df['Prediction on training set'].shift(-2)
+
+    result_df['Prediction on test set'] = testPredictPlot
+    result_df['Prediction on test set'] = result_df['Prediction on test set'].shift(-2)
+
+    result_df.index = data.index
+    st.title('Result')
+    st.subheader('Plot')
+    st.line_chart(result_df)
+    with st.expander('View result dataset'):
+        st.write(result_df)
+    st.download_button('Download result', result_df.to_csv(), file_name=f'{file_name}_prediction_results.csv')
 
 
