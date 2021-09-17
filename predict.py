@@ -99,7 +99,7 @@ if status == True:
         st.stop()
     
     data=df.sort_index(ascending=True,axis=0)
-
+    data[label_col] = data[label_col].replace({'\$': '', ',': '','€':''}, regex=True).astype(float)
     predict_df=data[[label_col]]
 
     dataset = predict_df.values
