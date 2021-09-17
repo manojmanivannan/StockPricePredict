@@ -74,7 +74,7 @@ def create_period_shift(df,period=4):
 
 import matplotlib.pyplot as plt
 
-def draw_neural_net(ax, left, right, bottom, top, layer_sizes):
+def draw_neural_net(ax, left, right, bottom, top, layer_sizes, layer_desc):
     '''
     Draw a neural network cartoon using matplotilb.
     
@@ -106,10 +106,9 @@ def draw_neural_net(ax, left, right, bottom, top, layer_sizes):
             circle = plt.Circle((n*h_spacing + left, layer_top - m*v_spacing), v_spacing/4.,
                                 color='w', ec='k', zorder=4)
             ax.add_artist(circle)
-    ax.text(left,               right,              'Input')
-    ax.text(left+h_spacing,     right,  'Layer 1')
-    ax.text(left+h_spacing*2,   right,  'Layer 2')
-    ax.text(right,              right,  'Output')
+            if m == 0:
+                ax.text(n*h_spacing + left,layer_top*1.1 - m*v_spacing,layer_desc[n])
+
     # Edges
     for n, (layer_size_a, layer_size_b) in enumerate(zip(layer_sizes[:-1], layer_sizes[1:])):
         layer_top_a = v_spacing*(layer_size_a - 1)/2. + (top + bottom)/2.

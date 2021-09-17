@@ -144,7 +144,7 @@ if status == True:
         fig = plt.figure(figsize=(12, 12))
         ax = fig.gca()
         ax.axis('off')
-        draw_neural_net(ax, .1, .9, .1, .9, layer_list)
+        draw_neural_net(ax, .1, .9, .1, .9, layer_list, layer_desc)
         st.pyplot(fig)
 
     lstm_model.compile(loss=loss, optimizer=optimizer)
