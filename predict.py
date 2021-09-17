@@ -9,10 +9,10 @@ from sklearn.metrics import mean_squared_error
 from sklearn.preprocessing import MinMaxScaler
 from keras.models import Sequential, load_model
 from keras.layers import LSTM, Dense, Dropout
-import base64
-import os
+from keras.utils.vis_utils import plot_model
 from app_functions import *
 from streamlit_echarts import st_echarts
+
 
 st.sidebar.subheader('Stock Dataset')
 status, df, file_name = file_upload('Please upload a stock price dataset')
@@ -63,13 +63,20 @@ if status == True:
 
     l_col1, l_col2, *l_colx = st.columns(no_layers)
 
-    with l_col1: layer_1 = st.slider('Layer 1 Nodes', min_value=1, max_value=100, value=50, step=1)
-    with l_col2: layer_2 = st.slider('Layer 2 Nodes', min_value=1, max_value=100, value=50, step=1)
+    with l_col1: layer_1 = st.slider('Layer 1 Nodes', min_value=1, max_value=100, value=10, step=1)
+    with l_col2: layer_2 = st.slider('Layer 2 Nodes', min_value=1, max_value=100, value=10, step=1)
+    layer_list = [period,layer_1, layer_2]
+    layer_desc = ['Input','Layer 1', 'Layer 2']
     if no_layers>2:
         i=2
         for each in l_colx:
-            with each: globals()['layer_'+str(i+1)] = st.slider(f'Layer {i+1} Nodes', min_value=1, max_value=100, value=50, step=1)
+            with each: 
+                globals()['layer_'+str(i+1)] = st.slider(f'Layer {i+1} Nodes', min_value=1, max_value=100, value=10, step=1)
+            layer_list.append(globals()['layer_'+str(i+1)])
+            layer_desc.append('Layer '+str(i+1))
             i+=1
+    layer_list.append(1)
+    layer_desc.append('Output')
 
     with st.expander('Advanced Parameters'):
         col4_1, col4_2 = st.columns(2)
@@ -128,6 +135,18 @@ if status == True:
                 lstm_model.add(LSTM(units=globals()['layer_'+str(i+1)],return_sequences = True))
             i+=1
     lstm_model.add(Dense(1))
+
+    with st.expander('View model layer diagram'):
+
+        plot_model(lstm_model,'data/image.png',show_shapes=True)
+        st.image('data/image.png')
+
+        fig = plt.figure(figsize=(12, 12))
+        ax = fig.gca()
+        ax.axis('off')
+        draw_neural_net(ax, .1, .9, .1, .9, layer_list)
+        st.pyplot(fig)
+
     lstm_model.compile(loss=loss, optimizer=optimizer)
     with st.spinner('Training Model..'):
         lstm_model.fit(trainX, trainY, epochs=epochs, batch_size=batchsize, verbose=2)
