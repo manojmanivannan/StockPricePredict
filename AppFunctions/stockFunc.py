@@ -29,13 +29,13 @@ def file_upload(name):
 
 def extract_features_from_date(df):
     format_col1, format_col2 = st.columns(2)
-    with format_col1: date_format = st.selectbox('Date format', ['YYYYMMDD','MMDDYYYY'], index=0)
-    with format_col2: separator = st.radio("Date separator", ('/', '-'))
+    with format_col1: date_format = st.selectbox('Date format', ['YYYY MM DD','MM DD YYYY'], index=0)
+    with format_col2: separator = st.radio("Date separator", ('-', '/'))
 
 
-    if date_format == 'MMDDYYYY':
+    if date_format == 'MM DD YYYY':
         d_format = "%m#%d#%Y".replace('#',separator)
-    if date_format == 'YYYYMMDD':
+    if date_format == 'YYYY MM DD':
         d_format = "%Y#%m#%d".replace('#',separator)
     
     try:

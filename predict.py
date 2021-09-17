@@ -10,20 +10,26 @@ from sklearn.preprocessing import MinMaxScaler
 from keras.models import Sequential, load_model
 from keras.layers import LSTM, Dense, Dropout
 from keras.utils.vis_utils import plot_model
-from app_functions import *
+from AppFunctions.stockFunc import *
+from AppFunctions.information import information
 from streamlit_echarts import st_echarts
 
+st.set_page_config(
+    page_title="Stock Price Prediction", 
+    page_icon='https://cdn-icons-png.flaticon.com/512/2422/2422796.png')
 
 st.sidebar.subheader('Stock Dataset')
 status, df, file_name = file_upload('Please upload a stock price dataset')
+st.sidebar.markdown(information['profile'],unsafe_allow_html=True)
 
 st.title('Stock Price Prediction')
 st.subheader('Using Keras Long-Short Term Memory (LSTM) Neural Network')
 st.text("")
 
 if not status:
-    st.write('Please use the sidebar to update your data !')
-
+    st.write('Please use the sidebar to upload your dataset !')
+    st.write('There are many ways to download historical stock price data.')
+    st.write('Just Google it !')
 
 
 if status:
@@ -60,6 +66,10 @@ if status == True:
     with col4:
         no_layers = int(st.number_input('# of layers',2,10,2,1))
 
+    if label_col == 'Date':
+        st.write('Can\'t apply model on \'Date\' column. Select another column to proceed !')
+        st.stop()
+    
 
     l_col1, l_col2, *l_colx = st.columns(no_layers)
 
@@ -90,10 +100,7 @@ if status == True:
         with col4_4:
             batchsize = int(st.number_input('Batch Size',1,100,10,5))
 
-    if label_col == 'Date':
-        st.write('Can not apply model on Date column')
-        st.stop()
-    
+
     data=df.sort_index(ascending=True,axis=0)
     data[label_col] = data[label_col].replace({'\$': '', ',': '','€':''}, regex=True).astype(float)
     predict_df=data[[label_col]]
