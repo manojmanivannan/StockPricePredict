@@ -40,20 +40,9 @@ if status:
         if len(feature_cols) ==0:
             st.write('Please atleast one column')
         else:
+            for each in feature_cols:
+                df[each] = df[each].replace({'\$': '', ',': '','€':''}, regex=True).astype(float)
             st.line_chart(df[feature_cols],use_container_width=True)
-
-    # option = {
-    #     "xAxis": {
-    #         "type": "category",
-    #         "data": df.index.astype(str).values.tolist(),
-    #     },
-    #     "yAxis": {"type": "value"},
-    #     "series": [{"data": df["Close"].astype(str).values.tolist(), "type": "scatter"}],
-    #     "lineStyle": [{ "color": '#5470C6', "width": '4', "type": 'dashed'}]
-    #     }
-    # st_echarts(
-    #     options=option, height="400px",
-    # )
 
 if status == True:
     col_names = list(df)
