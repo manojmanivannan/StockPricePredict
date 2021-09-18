@@ -170,9 +170,7 @@ if status == True:
     trainScore = math.sqrt(mean_squared_error(trainY[0], trainPredict[:,0]))
     testScore = math.sqrt(mean_squared_error(testY[0], testPredict[:,0]))
 
-    result1, result2 = st.columns(2)
-    with result1: st.write('Train Score: %.2f RMSE' % (trainScore))
-    with result2: st.write('Test Score: %.2f RMSE' % (testScore))
+
     # shift train predictions for plotting
     trainPredictPlot = np.empty_like(dataset)
     trainPredictPlot[:, :] = np.nan
@@ -191,6 +189,9 @@ if status == True:
 
     result_df.index = data.index
     st.title('Result')
+    result1, result2 = st.columns(2)
+    with result1: st.write('Train Score: %.2f RMSE' % (trainScore))
+    with result2: st.write('Test Score: %.2f RMSE' % (testScore))
     st.subheader('Plot')
     st.line_chart(result_df)
     with st.expander('View result dataset'):

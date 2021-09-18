@@ -63,14 +63,6 @@ def create_dataset(dataset, look_back=1):
         dataY.append(dataset[i + look_back, 0])
     return np.array(dataX), np.array(dataY)
 
-def create_period_shift(df,period=4):
-    tmp_df = df.copy()
-    col_name = list(df)
-    for i in range(period):
-        new_col = (col_name[0]+'_'+str(i+1))
-        tmp_df[new_col] = tmp_df[col_name].shift(-(i+1))
-    
-    return tmp_df.drop(col_name,axis=1).dropna()
 
 import matplotlib.pyplot as plt
 
