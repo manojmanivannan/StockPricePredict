@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import datetime, time
 import math
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
@@ -28,8 +29,20 @@ st.text("")
 
 if not status:
     st.write('Please use the sidebar to upload your dataset !')
-    st.write('There are many ways to download historical stock price data.')
-    st.write('Just Google it !')
+    with st.expander('Download from yahoo finance !'):
+        company = st.selectbox('Select company',['AAPL','TSLA','BTC-USD'], index=1)
+        st_dt, ed_dt = st.columns(2)
+        with st_dt: start_date = st.date_input('start date', datetime.date(2021,1,1))
+        with ed_dt: end_date = st.date_input('start date', datetime.date(2021,9,1))
+
+        period1 = int(time.mktime(start_date.timetuple()))
+        period2 = int(time.mktime(end_date.timetuple()))
+        interval = '1d' # 1d, 1m
+
+        query_string = f'https://query1.finance.yahoo.com/v7/finance/download/{company}?period1={period1}&period2={period2}&interval={interval}&events=history&includeAdjustedClose=true'
+        df_downloaded = pd.read_csv(query_string)
+        st.write(df_downloaded)
+        st.download_button('Download stock data', df_downloaded.to_csv(), file_name=f'{company}.csv')
 
 
 if status:
