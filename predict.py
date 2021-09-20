@@ -32,8 +32,8 @@ if not status:
     with st.expander('Download from yahoo finance !'):
         company = st.selectbox('Select company',['AAPL','TSLA','BTC-USD'], index=1)
         st_dt, ed_dt = st.columns(2)
-        with st_dt: start_date = st.date_input('start date', datetime.date(2021,1,1))
-        with ed_dt: end_date = st.date_input('start date', datetime.date(2021,9,1))
+        with st_dt: start_date = st.date_input('From', datetime.date(2021,1,1))
+        with ed_dt: end_date = st.date_input('To', datetime.date(2021,9,1))
 
         period1 = int(time.mktime(start_date.timetuple()))
         period2 = int(time.mktime(end_date.timetuple()))
