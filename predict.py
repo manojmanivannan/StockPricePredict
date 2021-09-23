@@ -14,6 +14,7 @@ from keras.utils.vis_utils import plot_model
 from AppFunctions.stockFunc import *
 from AppFunctions.information import information
 from streamlit_echarts import st_echarts
+import cufflinks as cf
 
 st.set_page_config(
     page_title="Stock Price Prediction", 
@@ -61,7 +62,12 @@ if status:
         else:
             for each in feature_cols:
                 df[each] = df[each].replace({'\$': '', ',': '','€':''}, regex=True).astype(float)
-            st.line_chart(df[feature_cols],use_container_width=True)
+
+            fig_plot = df[feature_cols].iplot(asFigure=True)
+            fig_plot.update_layout(plot_bgcolor='rgba(17,17,17,0)',paper_bgcolor ='rgba(10,10,10,0)', legend_bgcolor='rgba(0,0,0,0)')
+            st.plotly_chart(fig_plot)
+
+            # st.line_chart(df[feature_cols],use_container_width=True)
 
 if status == True:
     col_names = list(df)
@@ -206,7 +212,12 @@ if status == True:
     with result1: st.write('Train Score: %.2f RMSE' % (trainScore))
     with result2: st.write('Test Score: %.2f RMSE' % (testScore))
     st.subheader('Plot')
-    st.line_chart(result_df)
+
+    # st.line_chart(result_df)
+    fig_result = result_df.iplot(asFigure=True)
+    fig_result.update_layout(plot_bgcolor='rgba(17,17,17,0)',paper_bgcolor ='rgba(10,10,10,0)', legend_bgcolor='rgba(0,0,0,0)')
+    st.plotly_chart(fig_result)
+    
     with st.expander('View result dataset'):
         st.write(result_df)
     st.download_button('Download result', result_df.to_csv(), file_name=f'{file_name}_prediction_results.csv')

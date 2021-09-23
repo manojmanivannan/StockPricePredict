@@ -32,6 +32,12 @@ def extract_features_from_date(df):
     with format_col1: date_format = st.selectbox('Date format', ['YYYY MM DD','MM DD YYYY'], index=0)
     with format_col2: separator = st.radio("Date separator", ('-', '/'))
 
+    # Drop unwanted columns if present
+    col_list = list(df)
+    drop_cols = [s for s in col_list if 'Unnamed' in s]
+    if len(drop_cols) >0:
+        df.drop(drop_cols,axis=1,inplace=True)
+
 
     if date_format == 'MM DD YYYY':
         d_format = "%m#%d#%Y".replace('#',separator)
